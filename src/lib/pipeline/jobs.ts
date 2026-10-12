@@ -119,7 +119,7 @@ export async function runJob(job: ScanJob, ctx: JobContext): Promise<JobOutcome>
       if (!relevant.length) return { candidates: [], dropped: ["no relevant search results"], credits, followUps: [], healthSource: "google-search" };
 
       const content = relevant.map((h, i) => `[${i + 1}] ${h.title}\nURL: ${h.url}\n${h.description}`).join("\n\n");
-      const shows = await extractShows({ sourceLabel: "Google search results (snippets)", url: `search:${p.query}`, content, watchlist });
+      const shows = await extractShows({ sourceLabel: "Google search results (snippets)", url: `search:${p.query}`, content, watchlist, deadlineMs: ctx.deadlineMs });
       const raws = shows.map(fromExtracted).map((r) => ({ ...r, confidence: Math.min(r.confidence, 0.75) }));
       const out: Candidate[] = [];
       const dropped: string[] = [];
@@ -163,7 +163,7 @@ export async function runJob(job: ScanJob, ctx: JobContext): Promise<JobOutcome>
         return { candidates: [], dropped: ["page unchanged since last scan"], credits: res.credits, followUps: [], healthSource };
       }
 
-      const shows = await extractShows({ sourceLabel: p.label ?? host, url, content, watchlist });
+      const shows = await extractShows({ sourceLabel: p.label ?? host, url, content, watchlist, deadlineMs: ctx.deadlineMs });
       const r = collect(shows.map(fromExtracted), ctx, url, { source: host });
       await db().from("fetched_pages").update({ extracted_count: r.candidates.length }).eq("url_hash", urlHash);
 

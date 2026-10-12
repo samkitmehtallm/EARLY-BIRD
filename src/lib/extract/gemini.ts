@@ -122,7 +122,12 @@ export interface ExtractInput {
   url: string;
   content: string;
   watchlist: string[];
+  /** Wall-clock budget of the enclosing scan step; calls abort rather than outliving it. */
+  deadlineMs?: number;
 }
+
+/** Shortest Gemini call worth starting; below this the job is left for the next step. */
+const MIN_GEMINI_MS = 6_000;
 
 /** Calls Gemini Flash in JSON mode; validates with Zod; one repair retry, backoff on rate limits. */
 export async function extractShows(input: ExtractInput): Promise<ExtractedShow[]> {
@@ -138,6 +143,10 @@ ${input.content}
 
   let lastError = "";
   for (let attempt = 0; attempt < 3; attempt++) {
+    // A fetch may already have eaten most of the step. Extraction is retried on the
+    // next step rather than overrunning the function and killing the whole batch.
+    const left = input.deadlineMs ? input.deadlineMs - Date.now() : Infinity;
+    if (left < MIN_GEMINI_MS) throw new Error("Gemini: not enough time left in this step; will retry.");
     try {
       const res = await generate({
         model: env.geminiModel,
@@ -151,6 +160,7 @@ ${input.content}
           responseSchema: responseSchema as any,
           temperature: 0,
           maxOutputTokens: 8192,
+          ...(Number.isFinite(left) ? { abortSignal: AbortSignal.timeout(left) } : {}),
           ...(/2\.5-flash/.test(env.geminiModel) ? { thinkingConfig: { thinkingBudget: 0 } } : {}),
         },
       });
@@ -173,7 +183,7 @@ ${input.content}
       if (isAuthError(msg)) throw new Error(`Gemini rejected the API key (${msg.slice(0, 120)}).`);
       if (/429|RESOURCE_EXHAUSTED|503|UNAVAILABLE|overloaded/i.test(msg) && attempt < 2) {
         lastError = "rate limited";
-        await sleep(1500 * (attempt + 1));
+        await sleep(Math.min(1500 * (attempt + 1), Math.max(0, left - MIN_GEMINI_MS)));
         continue;
       }
       throw new Error(`Gemini: ${msg.slice(0, 200)}`);
