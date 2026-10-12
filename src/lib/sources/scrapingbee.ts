@@ -19,6 +19,20 @@ function cost(res: Response, fallback: number) {
 
 const BLOCKED = /(cf-chl|captcha|access denied|attention required|are you a robot|verify you are human)/i;
 
+/** Longest we ever wait on one ScrapingBee call, and the least that is worth starting. */
+export const MAX_FETCH_MS = 32_000;
+const SEARCH_FETCH_MS = 25_000;
+export const MIN_FETCH_MS = 8_000;
+
+/**
+ * How long this call may take: never more than `max`, never past the step deadline.
+ * Without this a single request can outlive the serverless function and the whole
+ * step is killed mid-job (FUNCTION_INVOCATION_TIMEOUT).
+ */
+export function budgetFor(deadlineMs: number | undefined, max: number) {
+  return deadlineMs ? Math.min(max, deadlineMs - Date.now()) : max;
+}
+
 /**
  * Fetches a page through ScrapingBee with JavaScript rendering, escalating to premium
  * then stealth proxies when the site blocks us. Each escalation costs more credits,
@@ -34,21 +48,24 @@ export async function scrapePage(url: string, opts: { maxStrategy?: Strategy; st
 
   for (let i = from; i <= to; i++) {
     const strategy = ladder[i];
-    if (opts.deadlineMs && Date.now() > opts.deadlineMs - 8_000) break;
+    const attemptMs = budgetFor(opts.deadlineMs, MAX_FETCH_MS);
+    if (attemptMs < MIN_FETCH_MS) break;
+    // Let ScrapingBee give up before our own socket does, so we get a readable body.
+    const renderMs = Math.max(5_000, Math.min(25_000, attemptMs - 4_000));
     const p = new URLSearchParams({
       api_key: env.scrapingBeeKey,
       url,
       render_js: "true",
       wait: "2000",
       block_ads: "true",
-      timeout: "25000",
+      timeout: String(renderMs),
     });
     if (strategy === "premium") p.set("premium_proxy", "true");
     if (strategy === "stealth") p.set("stealth_proxy", "true");
     if (strategy !== "render") p.set("country_code", "in");
 
     try {
-      const res = await fetchWithTimeout(`${BASE}/?${p}`, { timeoutMs: 32_000, retries: 0 });
+      const res = await fetchWithTimeout(`${BASE}/?${p}`, { timeoutMs: attemptMs, retries: 0 });
       credits += cost(res, strategy === "render" ? 5 : strategy === "premium" ? 25 : 75);
       const html = await res.text();
       if (res.status === 401) throw new Error("ScrapingBee rejected the API key (401).");
@@ -72,7 +89,7 @@ export interface SearchHit {
 }
 
 /** Google results through ScrapingBee's search endpoint, localised to India. */
-export async function googleSearch(query: string): Promise<{ hits: SearchHit[]; credits: number }> {
+export async function googleSearch(query: string, opts: { deadlineMs?: number } = {}): Promise<{ hits: SearchHit[]; credits: number }> {
   if (!env.scrapingBeeKey) throw new NotConfiguredError("ScrapingBee");
   const p = new URLSearchParams({
     api_key: env.scrapingBeeKey,
@@ -81,7 +98,9 @@ export async function googleSearch(query: string): Promise<{ hits: SearchHit[]; 
     language: "en",
     nb_results: "10",
   });
-  const res = await fetchWithTimeout(`${BASE}/store/google?${p}`, { timeoutMs: 25_000 });
+  const attemptMs = budgetFor(opts.deadlineMs, SEARCH_FETCH_MS);
+  if (attemptMs < MIN_FETCH_MS) throw new Error("Not enough time left in this step for a web search; it will be retried.");
+  const res = await fetchWithTimeout(`${BASE}/store/google?${p}`, { timeoutMs: attemptMs, retries: 0 });
   const credits = cost(res, 10);
   if (res.status === 401) throw new Error("ScrapingBee rejected the API key (401).");
   if (!res.ok) throw Object.assign(new Error(`ScrapingBee search ${res.status}: ${redact(await res.text()).slice(0, 160)}`), { credits });

@@ -9,7 +9,9 @@ import { runJob, sourcesConfigured, type JobContext } from "./jobs";
 import { storeCandidates } from "./store";
 
 const CLAIM_BATCH = 3;
-const SAFETY_MS = 12_000;
+// A claimed job may spend up to MAX_FETCH_MS (32s) on one request plus a Gemini call,
+// so a new batch is only worth starting when that much time is left.
+const SAFETY_MS = 20_000;
 
 export interface ScanProgress {
   run: ScanRun;

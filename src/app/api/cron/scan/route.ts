@@ -20,7 +20,7 @@ export async function GET(req: Request) {
   const t0 = Date.now();
   try {
     const { run, resumed } = await startScan("cron");
-    const p = await stepScan(run.id, 52_000 - (Date.now() - t0));
+    const p = await stepScan(run.id, 38_000 - (Date.now() - t0));
     return NextResponse.json({
       runId: run.id,
       resumed,

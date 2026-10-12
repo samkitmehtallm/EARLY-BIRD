@@ -111,7 +111,7 @@ export async function runJob(job: ScanJob, ctx: JobContext): Promise<JobOutcome>
 
     case "search": {
       await assertCredits(ctx);
-      const { hits, credits } = await googleSearch(p.query);
+      const { hits, credits } = await googleSearch(p.query, { deadlineMs: ctx.deadlineMs });
       await touchArtist(p.artistId);
       if (!hits.length) return { candidates: [], dropped: [], credits, followUps: [], healthSource: "google-search" };
       const artist = ctx.artists.find((a) => a.id === p.artistId);
