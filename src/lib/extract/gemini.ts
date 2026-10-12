@@ -87,11 +87,35 @@ Rules — follow all of them:
 10. Return {"shows": []} when nothing qualifies. Do not include shows from navigation menus, "you may also like" carousels or ads unless they are watchlist acts.`;
 }
 
-let client: GoogleGenAI | null = null;
-const ai = () => {
+/**
+ * Google issues two key styles: AI Studio keys ("AIza…") for the Gemini Developer API and
+ * newer "AQ.…" keys, which may belong to Vertex AI express mode. We try the Developer API
+ * first and fall back to Vertex express once if Google rejects the key, then remember what worked.
+ */
+let mode: "developer" | "vertex" | null = process.env.GEMINI_USE_VERTEX === "true" ? "vertex" : null;
+const clients: Partial<Record<"developer" | "vertex", GoogleGenAI>> = {};
+function client(m: "developer" | "vertex") {
   if (!env.geminiKey) throw new NotConfiguredError("Gemini");
-  return (client ??= new GoogleGenAI({ apiKey: env.geminiKey }));
-};
+  return (clients[m] ??= m === "vertex" ? new GoogleGenAI({ vertexai: true, apiKey: env.geminiKey }) : new GoogleGenAI({ apiKey: env.geminiKey }));
+}
+const isAuthError = (msg: string) => /API key not valid|API_KEY_INVALID|PERMISSION_DENIED|UNAUTHENTICATED|401|403/i.test(msg);
+
+type GenerateParams = Parameters<GoogleGenAI["models"]["generateContent"]>[0];
+async function generate(params: GenerateParams) {
+  if (mode) return client(mode).models.generateContent(params);
+  const first: "developer" | "vertex" = env.geminiKey?.startsWith("AQ.") ? "vertex" : "developer";
+  const second = first === "developer" ? "vertex" : "developer";
+  try {
+    const res = await client(first).models.generateContent(params);
+    mode = first;
+    return res;
+  } catch (e) {
+    if (!isAuthError(e instanceof Error ? e.message : String(e))) throw e;
+    const res = await client(second).models.generateContent(params);
+    mode = second;
+    return res;
+  }
+}
 
 export interface ExtractInput {
   sourceLabel: string;
@@ -115,7 +139,7 @@ ${input.content}
   let lastError = "";
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
-      const res = await ai().models.generateContent({
+      const res = await generate({
         model: env.geminiModel,
         contents: attempt === 0 || !lastError.startsWith("schema")
           ? user
@@ -146,7 +170,7 @@ ${input.content}
       return shows.data.shows;
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
-      if (/API key not valid|PERMISSION_DENIED|401|403/i.test(msg)) throw new Error("Gemini rejected the API key.");
+      if (isAuthError(msg)) throw new Error(`Gemini rejected the API key (${msg.slice(0, 120)}).`);
       if (/429|RESOURCE_EXHAUSTED|503|UNAVAILABLE|overloaded/i.test(msg) && attempt < 2) {
         lastError = "rate limited";
         await sleep(1500 * (attempt + 1));
@@ -160,10 +184,10 @@ ${input.content}
 
 /** Tiny health check for the Settings page. */
 export async function pingGemini(): Promise<string> {
-  const res = await ai().models.generateContent({
+  const res = await generate({
     model: env.geminiModel,
     contents: "Reply with the single word: ready",
     config: { temperature: 0, maxOutputTokens: 10 },
   });
-  return (res.text ?? "").trim();
+  return `${(res.text ?? "").trim()} (via ${mode === "vertex" ? "Vertex AI express" : "Gemini API"})`;
 }
