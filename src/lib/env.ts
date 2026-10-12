@@ -16,7 +16,7 @@ export const env = {
   supabaseAppSecret: read("SUPABASE_APP_SECRET"),
 
   geminiKey: read("GEMINI_API_KEY"),
-  geminiModel: read("GEMINI_MODEL") ?? "gemini-2.5-flash",
+  geminiModel: read("GEMINI_MODEL") ?? "gemini-flash-latest",
 
   scrapingBeeKey: read("SCRAPINGBEE_API_KEY"),
   ticketmasterKey: read("TICKETMASTER_API_KEY"),
