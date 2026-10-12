@@ -1,0 +1,409 @@
+<title>Early Bird Components Map</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Condensed:wght@600;700&display=swap">
+<style>
+  /* Layout: single reading column at 1080px, figures break full-width inside it */
+  :root{
+    --bg:#F3F5F7; --surface:#FFFFFF; --sunk:#EAEEF1;
+    --ink:#14181D; --muted:#5B6672; --line:#D5DBE2;
+    --accent:#0E6F68; --accent-soft:#DCEDEA;
+    --flag:#9A6200; --flag-soft:#F7EBD4;
+    --sans:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif;
+    --cond:"IBM Plex Sans Condensed","IBM Plex Sans",ui-sans-serif,sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0E1216; --surface:#161B21; --sunk:#1C222A;
+      --ink:#E7EBEF; --muted:#8D98A4; --line:#2A333D;
+      --accent:#35A79C; --accent-soft:#12302E;
+      --flag:#D79A33; --flag-soft:#332813;
+      color-scheme:dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0E1216; --surface:#161B21; --sunk:#1C222A;
+    --ink:#E7EBEF; --muted:#8D98A4; --line:#2A333D;
+    --accent:#35A79C; --accent-soft:#12302E;
+    --flag:#D79A33; --flag-soft:#332813;
+    color-scheme:dark;
+  }
+
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding-inline:20px;padding-block:48px 72px;display:flex;flex-direction:column;gap:46px}
+
+  header{display:flex;flex-direction:column;gap:14px;border-bottom:1px solid var(--line);padding-bottom:28px}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+  h1{font-family:var(--cond);font-weight:700;font-size:clamp(34px,6vw,52px);line-height:1.04;margin:0;text-wrap:balance;letter-spacing:-.01em}
+  .lede{font-size:17px;color:var(--muted);max-width:62ch;margin:0}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+  .chip{font-family:var(--mono);font-size:11px;padding:5px 10px;border:1px solid var(--line);border-radius:999px;color:var(--muted);background:var(--surface)}
+  .chip.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+
+  section{display:flex;flex-direction:column;gap:16px}
+  h2{font-family:var(--cond);font-weight:700;font-size:24px;margin:0;letter-spacing:.01em}
+  h2 .num{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--accent);margin-right:10px;vertical-align:2px}
+  p{margin:0;max-width:68ch}
+  .note{color:var(--muted);font-size:14px}
+
+  figure{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px 20px 16px;display:flex;flex-direction:column;gap:14px}
+  .scroller{overflow-x:auto}
+  figure svg{display:block;max-width:100%;height:auto;min-width:720px}
+  figcaption{font-size:13px;color:var(--muted);max-width:72ch;border-top:1px solid var(--line);padding-top:12px}
+
+  /* diagram tokens */
+  .nb{fill:var(--surface);stroke:var(--line);stroke-width:1.5}
+  .nb-sunk{fill:var(--sunk);stroke:var(--line);stroke-width:1.5}
+  .nb-acc{fill:var(--accent-soft);stroke:var(--accent);stroke-width:2}
+  .nb-flag{fill:var(--flag-soft);stroke:var(--flag);stroke-width:2}
+  .t{font-family:var(--sans);font-size:13px;font-weight:600;fill:var(--ink)}
+  .t-acc{fill:var(--accent)}
+  .t-flag{fill:var(--flag)}
+  .s{font-family:var(--mono);font-size:10.5px;fill:var(--muted)}
+  .edge{fill:none;stroke:var(--muted);stroke-width:1.5;marker-end:url(#arw)}
+  .edge-acc{fill:none;stroke:var(--accent);stroke-width:2;marker-end:url(#arwa)}
+  .edge-dash{fill:none;stroke:var(--muted);stroke-width:1.4;stroke-dasharray:5 4;marker-end:url(#arw)}
+  .el{font-family:var(--mono);font-size:10.5px;fill:var(--muted)}
+
+  table{border-collapse:collapse;width:100%;font-size:14px}
+  .scroller table{min-width:640px}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  thead th{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500;border-bottom:1.5px solid var(--line)}
+  td:first-child{font-weight:600;white-space:nowrap}
+  td code,p code,li code{font-family:var(--mono);font-size:12.5px;background:var(--sunk);padding:2px 5px;border-radius:4px}
+  .fail{color:var(--muted)}
+
+  pre{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.65;color:var(--ink)}
+  pre .k{color:var(--accent)}
+  pre .c{color:var(--muted)}
+
+  ol.steps{margin:0;padding-left:0;list-style:none;counter-reset:s;display:grid;gap:10px}
+  ol.steps li{counter-increment:s;display:grid;grid-template-columns:28px 1fr;gap:12px;align-items:baseline;font-size:14.5px;min-width:0}
+  ol.steps li::before{content:counter(s,decimal-leading-zero);font-family:var(--mono);font-size:11px;color:var(--accent)}
+
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;gap:7px;min-width:0}
+  .card h3{margin:0;font-family:var(--cond);font-size:16px;font-weight:700}
+  .card p{font-size:13.5px;color:var(--muted)}
+  .card.flagged{border-left:3px solid var(--flag)}
+
+  footer{border-top:1px solid var(--line);padding-top:20px;font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:6px}
+  @media (max-width:520px){.wrap{padding-block:32px 56px;gap:36px}}
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Components Map · v1</div>
+  <h1>Early Bird</h1>
+  <p class="lede">A concert watcher for Karan: it checks the acts he follows across ticketing APIs and listing pages every half hour, and emails him the moment a show appears — with the early-bird window flagged and Bengaluru dates on top.</p>
+  <div class="chips">
+    <span class="chip">Next.js on Vercel</span>
+    <span class="chip">Supabase Postgres</span>
+    <span class="chip on">Gemini Flash — extract · match · filter</span>
+    <span class="chip">ScrapingBee</span>
+    <span class="chip">Gmail API</span>
+    <span class="chip">Google Calendar</span>
+    <span class="chip">Vercel Cron · 30 min</span>
+  </div>
+</header>
+
+<section>
+  <h2><span class="num">01</span>The pipeline</h2>
+  <p>One scan run walks the whole path below. Every stage writes its outcome to <code>scan_runs</code>, so a source that blocks or times out degrades that run instead of failing it.</p>
+
+  <figure>
+    <div class="scroller">
+    <svg viewBox="0 0 1120 700" role="img" aria-label="Pipeline diagram: a cron trigger and a manual Scan now button drive a fetch orchestrator across four data sources; raw results pass through Gemini Flash for extraction, then a dedupe and diff stage upserts into Postgres; new or changed rows go to the alert engine and out by Gmail, while the dashboard reads the feed back from Postgres.">
+      <defs>
+        <marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="currentColor" style="fill:var(--muted)"></path>
+        </marker>
+        <marker id="arwa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" style="fill:var(--accent)"></path>
+        </marker>
+      </defs>
+
+      <!-- triggers -->
+      <rect class="nb" x="30" y="50" width="160" height="56" rx="8"></rect>
+      <text class="t" x="110" y="74" text-anchor="middle">Vercel Cron</text>
+      <text class="s" x="110" y="91" text-anchor="middle">every 30 min</text>
+
+      <rect class="nb" x="30" y="120" width="160" height="56" rx="8"></rect>
+      <text class="t" x="110" y="144" text-anchor="middle">Scan now</text>
+      <text class="s" x="110" y="161" text-anchor="middle">manual, from the UI</text>
+
+      <rect class="nb" x="30" y="200" width="160" height="86" rx="8"></rect>
+      <text class="t" x="110" y="226" text-anchor="middle">Artist registry</text>
+      <text class="s" x="110" y="245" text-anchor="middle">Spotify OAuth follows</text>
+      <text class="s" x="110" y="260" text-anchor="middle">fallback: 60 seeded</text>
+      <text class="s" x="110" y="275" text-anchor="middle">editable · CSV import</text>
+
+      <path class="edge" d="M190,78 H205 V113"></path>
+      <path class="edge" d="M190,148 H205 V113"></path>
+      <path class="edge" d="M205,113 H236"></path>
+      <text class="el" x="224" y="105" text-anchor="middle">run</text>
+      <path class="edge" d="M190,243 H212 V200 H236"></path>
+      <text class="el" x="214" y="262" text-anchor="middle">artists[]</text>
+
+      <!-- orchestrator -->
+      <rect class="nb" x="240" y="90" width="160" height="140" rx="8"></rect>
+      <text class="t" x="320" y="124" text-anchor="middle">Fetch orchestrator</text>
+      <text class="s" x="320" y="146" text-anchor="middle">artist × source queue</text>
+      <text class="s" x="320" y="161" text-anchor="middle">8 concurrent</text>
+      <text class="s" x="320" y="176" text-anchor="middle">12s timeout · 1 retry</text>
+      <text class="s" x="320" y="191" text-anchor="middle">per-source try/catch</text>
+      <text class="s" x="320" y="212" text-anchor="middle">writes scan_runs</text>
+
+      <path class="edge" d="M400,160 C424,160 424,65 446,65"></path>
+      <path class="edge" d="M400,160 C424,160 424,127 446,127"></path>
+      <path class="edge" d="M400,160 C424,160 424,193 446,193"></path>
+      <path class="edge" d="M400,160 C424,160 424,259 446,259"></path>
+      <text class="el" x="423" y="292" text-anchor="middle">fan out</text>
+
+      <!-- sources -->
+      <rect class="nb-sunk" x="450" y="40" width="180" height="50" rx="8"></rect>
+      <text class="t" x="540" y="62" text-anchor="middle">Ticketmaster API</text>
+      <text class="s" x="540" y="79" text-anchor="middle">Discovery · JSON</text>
+
+      <rect class="nb-sunk" x="450" y="102" width="180" height="50" rx="8"></rect>
+      <text class="t" x="540" y="124" text-anchor="middle">Bandsintown API</text>
+      <text class="s" x="540" y="141" text-anchor="middle">per-artist events</text>
+
+      <rect class="nb-sunk" x="450" y="164" width="180" height="58" rx="8"></rect>
+      <text class="t" x="540" y="186" text-anchor="middle">BookMyShow · District</text>
+      <text class="s" x="540" y="203" text-anchor="middle">ScrapingBee JS render</text>
+
+      <rect class="nb-sunk" x="450" y="234" width="180" height="50" rx="8"></rect>
+      <text class="t" x="540" y="256" text-anchor="middle">ScrapingBee search</text>
+      <text class="s" x="540" y="273" text-anchor="middle">when a source blocks</text>
+
+      <text class="s" x="540" y="320" text-anchor="middle">each failure logs source_status, run continues</text>
+
+      <path class="edge-acc" d="M630,65 C656,65 656,170 674,170"></path>
+      <path class="edge-acc" d="M630,127 C656,127 656,170 674,170"></path>
+      <path class="edge-acc" d="M630,193 C656,193 656,170 674,170"></path>
+      <path class="edge-acc" d="M630,259 C656,259 656,170 674,170"></path>
+      <text class="el" x="654" y="292" text-anchor="middle">raw HTML + JSON</text>
+
+      <!-- gemini -->
+      <rect class="nb-acc" x="680" y="90" width="180" height="160" rx="8"></rect>
+      <text class="t t-acc" x="770" y="122" text-anchor="middle">Gemini Flash</text>
+      <text class="s" x="770" y="144" text-anchor="middle">messy page → JSON</text>
+      <text class="s" x="770" y="159" text-anchor="middle">fuzzy artist match</text>
+      <text class="s" x="770" y="174" text-anchor="middle">early-bird read</text>
+      <text class="s" x="770" y="189" text-anchor="middle">drops non-India</text>
+      <text class="s" x="770" y="210" text-anchor="middle">confidence 0–1</text>
+      <text class="s" x="770" y="228" text-anchor="middle">under 0.6 → review</text>
+
+      <path class="edge-acc" d="M860,170 H900"></path>
+      <text class="el" x="880" y="161" text-anchor="middle">events[]</text>
+
+      <!-- dedupe -->
+      <rect class="nb" x="904" y="90" width="186" height="160" rx="8"></rect>
+      <text class="t" x="997" y="122" text-anchor="middle">Dedupe &amp; diff</text>
+      <text class="s" x="997" y="144" text-anchor="middle">key: artist|city|date</text>
+      <text class="s" x="997" y="159" text-anchor="middle">sets first_seen_at</text>
+      <text class="s" x="997" y="174" text-anchor="middle">merges source list</text>
+      <text class="s" x="997" y="189" text-anchor="middle">compares old vs new</text>
+      <text class="s" x="997" y="210" text-anchor="middle">emits NEW / CHANGED</text>
+
+      <path class="edge" d="M997,250 V416"></path>
+      <text class="el" x="1006" y="336" text-anchor="start">upsert</text>
+
+      <!-- storage and out -->
+      <rect class="nb" x="904" y="420" width="186" height="100" rx="8"></rect>
+      <text class="t" x="997" y="452" text-anchor="middle">Supabase Postgres</text>
+      <text class="s" x="997" y="473" text-anchor="middle">artists · events</text>
+      <text class="s" x="997" y="488" text-anchor="middle">alerts · scan_runs</text>
+      <text class="s" x="997" y="503" text-anchor="middle">unique on event_key</text>
+
+      <path class="edge" d="M900,470 H816"></path>
+      <text class="el" x="858" y="461" text-anchor="middle">new + changed</text>
+
+      <rect class="nb" x="620" y="420" width="190" height="100" rx="8"></rect>
+      <text class="t" x="715" y="452" text-anchor="middle">Alert engine</text>
+      <text class="s" x="715" y="473" text-anchor="middle">Bengaluru ranked first</text>
+      <text class="s" x="715" y="488" text-anchor="middle">early-bird → urgent</text>
+      <text class="s" x="715" y="503" text-anchor="middle">one row, one alert</text>
+
+      <path class="edge" d="M616,470 H546"></path>
+      <text class="el" x="580" y="461" text-anchor="middle">alert rows</text>
+
+      <rect class="nb" x="360" y="420" width="180" height="100" rx="8"></rect>
+      <text class="t" x="450" y="452" text-anchor="middle">Gmail API</text>
+      <text class="s" x="450" y="473" text-anchor="middle">users.messages.send</text>
+      <text class="s" x="450" y="488" text-anchor="middle">retry on 5xx</text>
+      <text class="s" x="450" y="503" text-anchor="middle">logs message id</text>
+
+      <path class="edge" d="M356,470 H276"></path>
+      <text class="el" x="316" y="461" text-anchor="middle">HTML email</text>
+
+      <rect class="nb-flag" x="90" y="420" width="180" height="100" rx="8"></rect>
+      <text class="t t-flag" x="180" y="452" text-anchor="middle">Karan's inbox</text>
+      <text class="s" x="180" y="473" text-anchor="middle">artist · venue · date</text>
+      <text class="s" x="180" y="488" text-anchor="middle">early-bird deadline</text>
+      <text class="s" x="180" y="503" text-anchor="middle">ticket + add-to-cal</text>
+
+      <!-- dashboard -->
+      <rect class="nb" x="360" y="580" width="430" height="90" rx="8"></rect>
+      <text class="t" x="575" y="610" text-anchor="middle">Dashboard · Next.js on Vercel</text>
+      <text class="s" x="575" y="631" text-anchor="middle">Bengaluru pinned · early-bird countdown · artist list</text>
+      <text class="s" x="575" y="646" text-anchor="middle">alert history · last scan time · per-source health</text>
+      <text class="s" x="575" y="661" text-anchor="middle">source + time on every card · I'm going button</text>
+
+      <path class="edge" d="M997,524 V625 H794"></path>
+      <text class="el" x="900" y="616" text-anchor="middle">feed query</text>
+
+      <rect class="nb" x="90" y="580" width="180" height="90" rx="8"></rect>
+      <text class="t" x="180" y="608" text-anchor="middle">Google Calendar</text>
+      <text class="s" x="180" y="629" text-anchor="middle">show-day event</text>
+      <text class="s" x="180" y="644" text-anchor="middle">early-bird reminder</text>
+      <text class="s" x="180" y="659" text-anchor="middle">popup + email alerts</text>
+
+      <path class="edge" d="M356,625 H274"></path>
+      <text class="el" x="315" y="616" text-anchor="middle">I'm going</text>
+      <path class="edge-dash" d="M180,520 V576"></path>
+      <text class="el" x="188" y="552" text-anchor="start">1-click add</text>
+    </svg>
+    </div>
+    <figcaption>Solid arrows carry data; the dashed one is the one-click link inside the alert email, which puts Karan's decision on his calendar. The teal path is the stretch where raw pages become typed records — the part that fails silently if Gemini returns anything but valid JSON, so it is schema-validated before the dedupe stage sees it.</figcaption>
+  </figure>
+</section>
+
+<section>
+  <h2><span class="num">02</span>One show, three sources, one row</h2>
+  <p>The same Bengaluru date shows up on Ticketmaster, BookMyShow and District with three different spellings. Collapsing them is what makes <code>first_seen_at</code> mean anything — and <code>first_seen_at</code> is the field that proves an alert fired at announcement, not hours later.</p>
+
+  <figure>
+    <div class="scroller">
+    <svg viewBox="0 0 920 320" role="img" aria-label="Three differently-spelled listings for the same concert pass through Gemini normalization into a single canonical key, which maps to one stored event row carrying first_seen_at and a merged source list.">
+      <rect class="nb-sunk" x="20" y="30" width="300" height="52" rx="8"></rect>
+      <text class="t" x="36" y="52">Ticketmaster</text>
+      <text class="s" x="36" y="70">"Prateek Kuhad Live" · Bengaluru · 14 Nov</text>
+
+      <rect class="nb-sunk" x="20" y="100" width="300" height="52" rx="8"></rect>
+      <text class="t" x="36" y="122">BookMyShow</text>
+      <text class="s" x="36" y="140">"Prateek Kuhad" · Phoenix Mall · 14/11/26</text>
+
+      <rect class="nb-sunk" x="20" y="170" width="300" height="52" rx="8"></rect>
+      <text class="t" x="36" y="192">District</text>
+      <text class="s" x="36" y="210">"PRATEEK KUHAD India Tour" · Bangalore</text>
+
+      <path class="edge-acc" d="M320,56 C348,56 348,130 368,130"></path>
+      <path class="edge-acc" d="M320,126 C348,126 348,130 368,130"></path>
+      <path class="edge-acc" d="M320,196 C348,196 348,130 368,130"></path>
+
+      <rect class="nb-acc" x="372" y="70" width="178" height="120" rx="8"></rect>
+      <text class="t t-acc" x="461" y="100" text-anchor="middle">Gemini normalize</text>
+      <text class="s" x="461" y="122" text-anchor="middle">name → canonical slug</text>
+      <text class="s" x="461" y="137" text-anchor="middle">venue → city</text>
+      <text class="s" x="461" y="152" text-anchor="middle">date → ISO</text>
+      <text class="s" x="461" y="172" text-anchor="middle">Bangalore ≡ Bengaluru</text>
+
+      <path class="edge-acc" d="M550,130 H606"></path>
+      <text class="el" x="578" y="121" text-anchor="middle">key</text>
+
+      <rect class="nb" x="610" y="98" width="290" height="64" rx="8"></rect>
+      <text class="s" x="755" y="124" text-anchor="middle" style="font-size:11.5px;fill:var(--ink)">prateek-kuhad|bengaluru|2026-11-14</text>
+      <text class="s" x="755" y="143" text-anchor="middle">unique index on events.event_key</text>
+
+      <path class="edge" d="M755,162 V204"></path>
+      <text class="el" x="765" y="186" text-anchor="start">upsert</text>
+
+      <rect class="nb-flag" x="610" y="208" width="290" height="92" rx="8"></rect>
+      <text class="t t-flag" x="628" y="232">one events row</text>
+      <text class="s" x="628" y="252">first_seen_at  2026-10-12T09:41Z  · set once</text>
+      <text class="s" x="628" y="268">sources  [ticketmaster, bookmyshow, district]</text>
+      <text class="s" x="628" y="284">early_bird  available · until 2026-10-19</text>
+    </svg>
+    </div>
+    <figcaption>Later sightings update the source list, the ticket URL and the early-bird fields, but never <code>first_seen_at</code>. An alert fires on insert, and again only when a watched field actually changes value.</figcaption>
+  </figure>
+</section>
+
+<section>
+  <h2><span class="num">03</span>Components</h2>
+  <div class="scroller">
+  <table>
+    <thead>
+      <tr><th>Component</th><th>Job</th><th>Built with</th><th>When it fails</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Artist registry</td><td>Holds who to watch, with canonical slugs and aliases</td><td>Postgres table, Spotify OAuth import, CSV upload</td><td class="fail">OAuth unavailable → 60 seeded artists stay in place, editable in the UI</td></tr>
+      <tr><td>Fetch orchestrator</td><td>Queues artist × source jobs, bounds concurrency and time</td><td>Route handler, <code>p-limit</code>, 12s timeout</td><td class="fail">One source throws; the others finish and the run is marked partial</td></tr>
+      <tr><td>Source adapters</td><td>Return raw text or JSON per artist, nothing more</td><td>Ticketmaster Discovery, Bandsintown, ScrapingBee (JS render) + <code>cheerio</code></td><td class="fail">403 or empty render → ScrapingBee premium proxy, then ScrapingBee Google search for that artist</td></tr>
+      <tr><td>Gemini extractor</td><td>Turns raw input into typed events; matches names; drops non-India</td><td>Gemini Flash, JSON mode, Zod validation</td><td class="fail">Invalid JSON → one reprompt, then the batch is skipped and logged</td></tr>
+      <tr><td>Dedupe &amp; diff</td><td>Collapses duplicates, stamps <code>first_seen_at</code>, emits change events</td><td>SQL upsert on <code>event_key</code>, field-level compare</td><td class="fail">Key collision on a genuinely different show → confidence gate sends it to review</td></tr>
+      <tr><td>Alert engine</td><td>Ranks, formats and sends; records what it sent</td><td>Gmail API (OAuth, send-as), HTML template, <code>alerts</code> table</td><td class="fail">Send error → row stays unsent and retries next run, so nothing is lost</td></tr>
+      <tr><td>Calendar</td><td>Turns a decision into a show-day event plus an early-bird reminder</td><td>Google Calendar API, <code>events.insert</code>, idempotent on event_key</td><td class="fail">Token expired → button shows Reconnect Google; nothing is half-created</td></tr>
+      <tr><td>Dashboard</td><td>The feed, artist management, alert history, scan health</td><td>Next.js App Router, server components</td><td class="fail">Empty DB → seeded events render, labelled with their scan time</td></tr>
+      <tr><td>Scheduler</td><td>Runs the pipeline unattended</td><td>Vercel Cron, <code>/api/scan</code> behind a secret</td><td class="fail">Plan limits cron frequency → external ping plus the manual button</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">04</span>What Gemini returns</h2>
+  <p>The model is held to one shape. Anything that does not validate is reprompted once and then dropped, so a bad extraction never reaches the feed as a half-filled card.</p>
+  <pre><span class="c">// one element per detected show; the whole response is an array</span>
+{
+  <span class="k">artist</span>:              "Prateek Kuhad",
+  <span class="k">artist_slug</span>:         "prateek-kuhad",      <span class="c">// matched against the registry</span>
+  <span class="k">venue</span>:               "Phoenix Mall of Asia",
+  <span class="k">city</span>:                "Bengaluru",          <span class="c">// Bangalore normalises to this</span>
+  <span class="k">country</span>:             "IN",                 <span class="c">// anything else is discarded</span>
+  <span class="k">date</span>:                "2026-11-14",         <span class="c">// ISO, null if only "November"</span>
+  <span class="k">ticket_url</span>:          "https://…",
+  <span class="k">early_bird_status</span>:   "available",          <span class="c">// available | upcoming | sold_out | none | unknown</span>
+  <span class="k">early_bird_deadline</span>: "2026-10-19T18:30:00+05:30",
+  <span class="k">price_from</span>:          1499,                 <span class="c">// INR, null when not listed</span>
+  <span class="k">confidence</span>:          0.91                  <span class="c">// below 0.6 → held for review, no alert</span>
+}</pre>
+</section>
+
+<section>
+  <h2><span class="num">05</span>What makes an alert fire</h2>
+  <div class="grid2">
+    <div class="card">
+      <h3>New row</h3>
+      <p>An <code>event_key</code> never seen before. This is the announcement alert, and <code>first_seen_at</code> records the minute it was caught.</p>
+    </div>
+    <div class="card flagged">
+      <h3>Early bird opens</h3>
+      <p><code>early_bird_status</code> moves from <code>upcoming</code> to <code>available</code>. Sent as urgent, with the deadline and a countdown.</p>
+    </div>
+    <div class="card flagged">
+      <h3>Deadline inside 24h</h3>
+      <p>A nightly sweep catches windows about to close on shows already in the feed. One reminder per event, never repeated.</p>
+    </div>
+    <div class="card">
+      <h3>Date or venue moves</h3>
+      <p>A watched field changes on an existing row. Sent quietly, showing the old value beside the new one.</p>
+    </div>
+  </div>
+  <p class="note">Bengaluru events sort to the top of every email and carry a city badge. Price changes, description edits and new source sightings update the row but send nothing — that is what keeps the inbox worth opening.</p>
+</section>
+
+<section>
+  <h2><span class="num">06</span>Build order</h2>
+  <ol class="steps">
+    <li>Schema and seeded artist list in Supabase — nothing to show, everything depends on it.</li>
+    <li>Ticketmaster adapter only, straight through Gemini into <code>events</code>. One source, end to end.</li>
+    <li>Dedupe and <code>first_seen_at</code>, proven by running the same scan twice and getting one row.</li>
+    <li>Dashboard feed with Bengaluru pinned, so there is something to look at.</li>
+    <li>Gmail alert on insert, fired manually from the Scan now button.</li>
+    <li>Vercel Cron, with the secret on the route.</li>
+    <li>Bandsintown, then BookMyShow and District, then the search fallback.</li>
+    <li>Google Calendar “I'm going” action, early-bird countdown, alert history, per-source health, README.</li>
+  </ol>
+  <p class="note">Steps 1–5 are the submittable system. Everything after widens coverage; nothing after changes the shape of the map above.</p>
+</section>
+
+<footer>
+  <div>Early Bird · components map · 12 October 2026</div>
+  <div>Secrets live in Vercel environment variables: <code>GEMINI_API_KEY</code>, <code>SCRAPINGBEE_API_KEY</code>, <code>TICKETMASTER_API_KEY</code>, <code>GOOGLE_CLIENT_ID</code> / <code>SECRET</code>, <code>SUPABASE_*</code>, <code>CRON_SECRET</code>. None of them are in the repository.</div>
+</footer>
+
+</div>

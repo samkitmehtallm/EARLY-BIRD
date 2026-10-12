@@ -1,26 +1,120 @@
 @import "tailwindcss";
 
+/* Early Bird — "backstage pass" system.
+   Ink-and-paper neutrals with a cool blue bias, one stage-light accent (Bengaluru + primary
+   actions), and amber reserved for early-bird windows so urgency always reads the same. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --bg: #f4f5f8;
+  --surface: #ffffff;
+  --surface-2: #eceef3;
+  --ink: #101218;
+  --ink-2: #3a404c;
+  --muted: #646c7a;
+  --line: #dde1e8;
+  --accent: #2f45d8;
+  --accent-soft: #e6e9fc;
+  --accent-ink: #ffffff;
+  --eb: #a85a00;
+  --eb-soft: #fdf0d8;
+  --urgent: #c2261a;
+  --urgent-soft: #fde6e3;
+  --ok: #157a3c;
+  --ok-soft: #e1f4e8;
+  --shadow: 0 1px 2px rgb(16 18 24 / 0.04), 0 4px 16px rgb(16 18 24 / 0.05);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --bg: #0b0d12;
+    --surface: #13161d;
+    --surface-2: #1b1f28;
+    --ink: #eceef3;
+    --ink-2: #c3c8d2;
+    --muted: #8b93a1;
+    --line: #262b36;
+    --accent: #8796ff;
+    --accent-soft: #1d2246;
+    --accent-ink: #0b0d12;
+    --eb: #f2b14a;
+    --eb-soft: #33260e;
+    --urgent: #ff7a6b;
+    --urgent-soft: #3a1714;
+    --ok: #57d68a;
+    --ok-soft: #10301d;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 6px 20px rgb(0 0 0 / 0.25);
+    color-scheme: dark;
   }
 }
 
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-ink: var(--accent-ink);
+  --color-eb: var(--eb);
+  --color-eb-soft: var(--eb-soft);
+  --color-urgent: var(--urgent);
+  --color-urgent-soft: var(--urgent-soft);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-display: "Bricolage Grotesque Variable", var(--font-geist-sans), ui-sans-serif, sans-serif;
+  --shadow-card: var(--shadow);
+}
+
+html,
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "ss01", "cv11";
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Ticket-stub perforation between the date stub and the body of a show card. */
+.perf {
+  background-image: radial-gradient(circle at 0 6px, var(--bg) 5px, transparent 5.5px);
+  background-size: 10px 12px;
+  background-repeat: repeat-y;
+  width: 10px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--urgent) 45%, transparent); }
+  70% { box-shadow: 0 0 0 7px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+.pulse { animation: pulse-ring 2s infinite; }
+
+@keyframes rise { from { opacity: .001; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.rise { animation: rise .35s ease-out both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse, .rise { animation: none; }
 }
